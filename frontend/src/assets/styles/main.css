@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme variables */
+:root {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border-color: #374151;
+}
+
+.light {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+}
+
+/* Base styles */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Custom utility classes for trading platform */
+@layer components {
+  .card {
+    @apply rounded-lg p-4 shadow-lg transition-colors duration-200;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white;
+  }
+
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white;
+  }
+
+  .btn-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .btn-secondary:hover {
+    opacity: 0.8;
+  }
+
+  .input {
+    @apply rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-200;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .label {
+    @apply block text-sm font-medium mb-1;
+    color: var(--text-secondary);
+  }
+
+  /* Theme-aware text colors */
+  .text-theme-primary {
+    color: var(--text-primary);
+  }
+
+  .text-theme-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-theme-muted {
+    color: var(--text-muted);
+  }
+
+  .bg-theme-primary {
+    background-color: var(--bg-primary);
+  }
+
+  .bg-theme-secondary {
+    background-color: var(--bg-secondary);
+  }
+
+  .bg-theme-tertiary {
+    background-color: var(--bg-tertiary);
+  }
+
+  .border-theme {
+    border-color: var(--border-color);
+  }
+
+  /* Profit/Loss colors - same in both themes */
+  .text-profit {
+    @apply text-green-500;
+  }
+
+  .text-loss {
+    @apply text-red-500;
+  }
+
+  /* Signal badge styles */
+  .signal-badge {
+    @apply px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .signal-golden {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .dark .signal-golden {
+    @apply bg-green-900 text-green-300;
+  }
+
+  .signal-death {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .dark .signal-death {
+    @apply bg-red-900 text-red-300;
+  }
+
+  .signal-none {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+  }
+
+  /* Dark mode specific overrides */
+  .dark {
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --border-color: #374151;
+  }
+}
