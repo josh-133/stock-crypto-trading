@@ -1,14 +1,14 @@
 <template>
   <div class="card">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold text-white">{{ symbol }} Price Chart</h2>
+      <h2 class="text-lg font-semibold text-theme-primary">{{ symbol }} Price Chart</h2>
       <div class="flex space-x-2">
         <button
           v-for="s in symbols"
           :key="s"
           @click="changeSymbol(s)"
           class="px-3 py-1 rounded text-sm"
-          :class="symbol === s ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'"
+          :class="symbol === s ? 'bg-blue-600 text-white' : 'bg-theme-tertiary text-theme-secondary hover:bg-theme-secondary hover:text-theme-primary'"
         >
           {{ s }}
         </button>
@@ -18,7 +18,7 @@
     <div ref="chartContainer" class="h-96 w-full"></div>
 
     <!-- Legend -->
-    <div class="mt-4 flex items-center space-x-6 text-sm">
+    <div class="mt-4 flex items-center space-x-6 text-sm text-theme-secondary">
       <span class="flex items-center">
         <span class="w-3 h-0.5 bg-blue-500 mr-2"></span>
         SMA 10
@@ -53,6 +53,8 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  // Clean up event listener to prevent memory leaks
+  window.removeEventListener('resize', handleResize)
   if (chart) {
     chart.remove()
   }

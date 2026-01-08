@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import API_CONFIG
-from .api.routes import stocks, signals, portfolio, trades, backtest
+from .api.routes import stocks, signals, portfolio, trades, backtest, benchmark
 
 # Create FastAPI app
 app = FastAPI(
@@ -17,12 +17,13 @@ app = FastAPI(
 )
 
 # Configure CORS for frontend
+# Security: Explicitly specify allowed methods and headers instead of wildcards
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Vite dev server
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Only methods we actually use
+    allow_headers=["Content-Type", "Authorization"],  # Only headers we need
 )
 
 # Include routers
@@ -31,6 +32,7 @@ app.include_router(signals.router, prefix="/api")
 app.include_router(portfolio.router, prefix="/api")
 app.include_router(trades.router, prefix="/api")
 app.include_router(backtest.router, prefix="/api")
+app.include_router(benchmark.router, prefix="/api")
 
 
 @app.get("/")
@@ -47,6 +49,7 @@ async def root():
             "portfolio": "/api/portfolio",
             "trades": "/api/trades",
             "backtest": "/api/backtest",
+            "benchmark": "/api/benchmark",
         },
     }
 

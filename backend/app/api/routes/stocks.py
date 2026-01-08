@@ -1,13 +1,16 @@
 """
 Stock data API endpoints.
 """
+import logging
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 
 from ...services.data_service import data_service
 from ...services.indicator_service import add_indicators, get_indicator_values
 from ...models.stock import StockData, StockPrice, StockLatest
-from ...config import DATA_CONFIG
+from ...config import DATA_CONFIG, STOCK_UNIVERSE
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
@@ -26,6 +29,21 @@ async def get_stock_data(symbol: str, days: int = DATA_CONFIG["lookback_days"]):
     """
     try:
         symbol = symbol.upper()
+
+        # Input validation: Check symbol is in allowed list
+        if symbol not in STOCK_UNIVERSE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
+            )
+
+        # Input validation: Bounds check on days
+        if days < 1 or days > 1825:  # Max ~5 years
+            raise HTTPException(
+                status_code=400,
+                detail="Days must be between 1 and 1825"
+            )
+
         df = data_service.get_stock_data(symbol, days=days)
         df = add_indicators(df)
 
@@ -58,8 +76,11 @@ async def get_stock_data(symbol: str, days: int = DATA_CONFIG["lookback_days"]):
             change_percent=float(change_pct),
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Error fetching data for {symbol}: {str(e)}")
+        logger.error(f"Error fetching data for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch stock data. Please try again.")
 
 
 @router.get("/{symbol}/latest", response_model=StockLatest)
@@ -75,6 +96,14 @@ async def get_latest_price(symbol: str):
     """
     try:
         symbol = symbol.upper()
+
+        # Input validation: Check symbol is in allowed list
+        if symbol not in STOCK_UNIVERSE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
+            )
+
         latest = data_service.get_latest_price(symbol)
 
         return StockLatest(
@@ -86,5 +115,8 @@ async def get_latest_price(symbol: str):
             timestamp=latest["timestamp"],
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Error fetching price for {symbol}: {str(e)}")
+        logger.error(f"Error fetching price for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch latest price. Please try again.")

@@ -1,12 +1,15 @@
 """
 Data service for fetching stock data from yfinance.
 """
+import logging
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
 from typing import Optional
 
 from ..config import DATA_CONFIG, STOCK_UNIVERSE
+
+logger = logging.getLogger(__name__)
 
 
 class DataService:
@@ -80,7 +83,7 @@ class DataService:
             try:
                 data[symbol] = self.get_stock_data(symbol)
             except Exception as e:
-                print(f"Error fetching {symbol}: {e}")
+                logger.error(f"Error fetching {symbol}: {e}")
         return data
 
     def clear_cache(self):

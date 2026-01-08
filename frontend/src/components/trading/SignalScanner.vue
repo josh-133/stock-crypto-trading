@@ -71,9 +71,11 @@
 import { computed } from 'vue'
 import { useSignalsStore } from '../../stores/signals'
 import { usePortfolioStore } from '../../stores/portfolio'
+import { useToast } from '../../composables/useToast'
 
 const signalsStore = useSignalsStore()
 const portfolioStore = usePortfolioStore()
+const toast = useToast()
 
 const signals = computed(() => signalsStore.signals)
 const loading = computed(() => signalsStore.loading)
@@ -115,9 +117,9 @@ function getSignalLabel(type) {
 async function handleBuy(symbol) {
   try {
     const trade = await portfolioStore.executeBuy(symbol)
-    alert(`Bought ${trade.shares} shares of ${symbol} at $${trade.price.toFixed(2)}`)
+    toast.success(`Bought ${trade.shares} shares of ${symbol} at $${trade.price.toFixed(2)}`)
   } catch (err) {
-    alert(err.message || 'Trade failed')
+    toast.error(err.message || 'Trade failed')
   }
 }
 
@@ -125,9 +127,9 @@ async function handleSell(symbol) {
   try {
     const trade = await portfolioStore.executeSell(symbol)
     const pnlStr = trade.pnl >= 0 ? `+$${trade.pnl.toFixed(2)}` : `-$${Math.abs(trade.pnl).toFixed(2)}`
-    alert(`Sold ${symbol} at $${trade.price.toFixed(2)}. P&L: ${pnlStr}`)
+    toast.success(`Sold ${symbol} at $${trade.price.toFixed(2)}. P&L: ${pnlStr}`)
   } catch (err) {
-    alert(err.message || 'Sell failed')
+    toast.error(err.message || 'Sell failed')
   }
 }
 </script>

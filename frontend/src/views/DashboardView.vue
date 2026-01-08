@@ -10,7 +10,7 @@
       </p>
     </div>
 
-    <!-- Top Row: Portfolio Summary + Signals -->
+    <!-- Top Row: Portfolio Summary + Performance Metrics -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2">
         <PortfolioSummary />
@@ -18,6 +18,12 @@
       <div>
         <PerformanceMetrics />
       </div>
+    </div>
+
+    <!-- Second Row: Pie Chart + Benchmark -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <PortfolioPieChart />
+      <PerformanceBenchmark />
     </div>
 
     <!-- Chart -->
@@ -59,6 +65,8 @@ import { useSettingsStore } from '../stores/settings'
 import { tradingTerms } from '../composables/useTooltips'
 import PortfolioSummary from '../components/dashboard/PortfolioSummary.vue'
 import PerformanceMetrics from '../components/dashboard/PerformanceMetrics.vue'
+import PortfolioPieChart from '../components/dashboard/PortfolioPieChart.vue'
+import PerformanceBenchmark from '../components/dashboard/PerformanceBenchmark.vue'
 import SignalAlerts from '../components/dashboard/SignalAlerts.vue'
 import PriceChart from '../components/charts/PriceChart.vue'
 import PositionCard from '../components/trading/PositionCard.vue'

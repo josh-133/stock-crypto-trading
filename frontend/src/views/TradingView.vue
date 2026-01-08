@@ -110,6 +110,7 @@
 import { computed, onMounted } from 'vue'
 import { usePortfolioStore } from '../stores/portfolio'
 import { useSignalsStore } from '../stores/signals'
+import { useToast } from '../composables/useToast'
 import SignalScanner from '../components/trading/SignalScanner.vue'
 import TradeForm from '../components/trading/TradeForm.vue'
 import PriceChart from '../components/charts/PriceChart.vue'
@@ -117,6 +118,7 @@ import PositionCard from '../components/trading/PositionCard.vue'
 
 const portfolioStore = usePortfolioStore()
 const signalsStore = useSignalsStore()
+const toast = useToast()
 
 const positions = computed(() => portfolioStore.positions)
 const trades = computed(() => portfolioStore.trades)
@@ -132,9 +134,9 @@ onMounted(async () => {
 async function checkStops() {
   const result = await portfolioStore.checkStops()
   if (result && result.triggered_count > 0) {
-    alert(`${result.triggered_count} position(s) hit stop loss and were sold.`)
+    toast.warning(`${result.triggered_count} position(s) hit stop loss and were sold.`)
   } else {
-    alert('No positions hit their stop loss.')
+    toast.info('No positions hit their stop loss.')
   }
 }
 

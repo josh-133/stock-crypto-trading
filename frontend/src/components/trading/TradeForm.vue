@@ -64,9 +64,11 @@
 import { ref, computed, watch } from 'vue'
 import { usePortfolioStore } from '../../stores/portfolio'
 import { useSignalsStore } from '../../stores/signals'
+import { useToast } from '../../composables/useToast'
 
 const portfolioStore = usePortfolioStore()
 const signalsStore = useSignalsStore()
+const toast = useToast()
 
 const symbol = ref('SPY')
 const loading = ref(false)
@@ -133,9 +135,9 @@ async function handleSubmit() {
   loading.value = true
   try {
     const trade = await portfolioStore.executeBuy(symbol.value)
-    alert(`Bought ${trade.shares} shares of ${symbol.value} at $${trade.price.toFixed(2)}`)
+    toast.success(`Bought ${trade.shares} shares of ${symbol.value} at $${trade.price.toFixed(2)}`)
   } catch (err) {
-    alert(err.message || 'Trade failed')
+    toast.error(err.message || 'Trade failed')
   } finally {
     loading.value = false
   }

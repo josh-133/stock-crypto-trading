@@ -1,12 +1,16 @@
 """
 Backtesting API endpoints.
 """
+import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
 from ...services.backtest_service import run_backtest, BacktestResult
+from ...config import STOCK_UNIVERSE
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/backtest", tags=["backtest"])
 
@@ -55,6 +59,53 @@ async def backtest(request: BacktestRequest):
     try:
         symbol = request.symbol.upper()
 
+        # Input validation: Check symbol is in allowed list
+        if symbol not in STOCK_UNIVERSE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
+            )
+
+        # Input validation: Check date format and logic
+        if request.start_date:
+            try:
+                start_dt = datetime.strptime(request.start_date, "%Y-%m-%d")
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail="start_date must be in YYYY-MM-DD format"
+                )
+
+        if request.end_date:
+            try:
+                end_dt = datetime.strptime(request.end_date, "%Y-%m-%d")
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail="end_date must be in YYYY-MM-DD format"
+                )
+            # Check end date is not in the future
+            if end_dt > datetime.now():
+                raise HTTPException(
+                    status_code=400,
+                    detail="end_date cannot be in the future"
+                )
+
+        if request.start_date and request.end_date:
+            if start_dt >= end_dt:
+                raise HTTPException(
+                    status_code=400,
+                    detail="start_date must be before end_date"
+                )
+
+        # Input validation: Check initial capital bounds
+        if request.initial_capital is not None:
+            if request.initial_capital < 100 or request.initial_capital > 10000000:
+                raise HTTPException(
+                    status_code=400,
+                    detail="initial_capital must be between $100 and $10,000,000"
+                )
+
         result = run_backtest(
             symbol=symbol,
             start_date=request.start_date,
@@ -100,7 +151,11 @@ async def backtest(request: BacktestRequest):
             trades=trades,
         )
 
+    except HTTPException:
+        raise
     except ValueError as e:
+        # ValueError is raised for known issues like insufficient data
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Backtest error: {str(e)}")
+        logger.error(f"Backtest error for {request.symbol}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to run backtest. Please try again.")

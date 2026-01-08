@@ -1,10 +1,14 @@
 """
 Trade execution API endpoints.
 """
+import logging
 from fastapi import APIRouter, HTTPException
 
 from ...services.portfolio_service import portfolio_service
 from ...models.trade import Trade, TradeRequest, TradeHistory
+from ...config import STOCK_UNIVERSE
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/trades", tags=["trades"])
 
@@ -32,6 +36,13 @@ async def execute_trade(request: TradeRequest):
     try:
         symbol = request.symbol.upper()
 
+        # Input validation: Check symbol is in allowed list
+        if symbol not in STOCK_UNIVERSE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
+            )
+
         if request.action.value == "buy":
             trade = portfolio_service.buy(
                 symbol=symbol,
@@ -45,10 +56,14 @@ async def execute_trade(request: TradeRequest):
 
         return trade
 
+    except HTTPException:
+        raise
     except ValueError as e:
+        # ValueError is raised for known business logic errors (e.g., insufficient cash)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error executing trade: {str(e)}")
+        logger.error(f"Error executing trade for {request.symbol}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to execute trade. Please try again.")
 
 
 @router.get("", response_model=TradeHistory)
@@ -62,7 +77,8 @@ async def get_trades():
     try:
         return portfolio_service.get_trades()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting trades: {str(e)}")
+        logger.error(f"Error getting trades: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve trades. Please try again.")
 
 
 @router.get("/{trade_id}", response_model=Trade)
@@ -81,8 +97,9 @@ async def get_trade(trade_id: str):
         for trade in trades.trades:
             if trade.id == trade_id:
                 return trade
-        raise HTTPException(status_code=404, detail=f"Trade {trade_id} not found")
+        raise HTTPException(status_code=404, detail="Trade not found")
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting trade: {str(e)}")
+        logger.error(f"Error getting trade {trade_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve trade. Please try again.")

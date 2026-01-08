@@ -76,6 +76,12 @@ export function useApi() {
     return response.data
   }
 
+  // Benchmark
+  const getBenchmark = async (days = 365) => {
+    const response = await api.get('/benchmark', { params: { days } })
+    return response.data
+  }
+
   return {
     getStockData,
     getLatestPrice,
@@ -89,5 +95,6 @@ export function useApi() {
     executeTrade,
     getTrades,
     runBacktest,
+    getBenchmark,
   }
 }

@@ -7,6 +7,7 @@
         <router-view />
       </main>
     </div>
+    <ToastContainer />
   </div>
 </template>
 
@@ -14,6 +15,7 @@
 import { onMounted } from 'vue'
 import Navbar from './components/layout/Navbar.vue'
 import Sidebar from './components/layout/Sidebar.vue'
+import ToastContainer from './components/ui/ToastContainer.vue'
 import { useSettingsStore } from './stores/settings'
 
 const settingsStore = useSettingsStore()

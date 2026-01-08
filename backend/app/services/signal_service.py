@@ -7,6 +7,7 @@ Educational Note:
 
 These signals work best in trending markets and struggle in sideways markets.
 """
+import logging
 import pandas as pd
 from datetime import datetime
 from typing import Optional
@@ -15,6 +16,8 @@ from ..config import STRATEGY_CONFIG, STOCK_UNIVERSE
 from ..models.signal import Signal, SignalType, SignalSummary
 from .data_service import data_service
 from .indicator_service import add_indicators
+
+logger = logging.getLogger(__name__)
 
 
 def detect_crossover(df: pd.DataFrame) -> tuple[SignalType, Optional[int]]:
@@ -160,7 +163,7 @@ def get_all_signals() -> SignalSummary:
             signal = get_signal_for_stock(symbol)
             signals.append(signal)
         except Exception as e:
-            print(f"Error getting signal for {symbol}: {e}")
+            logger.error(f"Error getting signal for {symbol}: {e}")
 
     return SignalSummary(
         signals=signals,

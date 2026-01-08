@@ -96,6 +96,7 @@
 import { ref } from 'vue'
 import { usePortfolioStore } from '../../stores/portfolio'
 import { tradingTerms } from '../../composables/useTooltips'
+import { useToast } from '../../composables/useToast'
 import Tooltip from '../ui/Tooltip.vue'
 
 const props = defineProps({
@@ -106,6 +107,7 @@ const props = defineProps({
 })
 
 const portfolioStore = usePortfolioStore()
+const toast = useToast()
 const selling = ref(false)
 
 async function handleSell() {
@@ -113,10 +115,12 @@ async function handleSell() {
 
   selling.value = true
   try {
-    await portfolioStore.executeSell(props.position.symbol)
+    const trade = await portfolioStore.executeSell(props.position.symbol)
+    const pnlStr = trade.pnl >= 0 ? `+$${trade.pnl.toFixed(2)}` : `-$${Math.abs(trade.pnl).toFixed(2)}`
+    toast.success(`Sold ${props.position.symbol}. P&L: ${pnlStr}`)
   } catch (err) {
     console.error('Error selling:', err)
-    alert(err.message || 'Failed to sell position')
+    toast.error(err.message || 'Failed to sell position')
   } finally {
     selling.value = false
   }

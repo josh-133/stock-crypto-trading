@@ -299,12 +299,14 @@ import { ref, onMounted } from 'vue'
 import { usePortfolioStore } from '../stores/portfolio'
 import { useSettingsStore } from '../stores/settings'
 import { useExport } from '../composables/useExport'
+import { useToast } from '../composables/useToast'
 import { tradingTerms } from '../composables/useTooltips'
 import Tooltip from '../components/ui/Tooltip.vue'
 
 const portfolioStore = usePortfolioStore()
 const settingsStore = useSettingsStore()
 const { exportTradesToCSV, exportPortfolioToCSV } = useExport()
+const toast = useToast()
 
 const symbols = ['AAPL', 'MSFT', 'GOOGL', 'SPY']
 const resetting = ref(false)
@@ -322,9 +324,9 @@ async function handleReset() {
   resetting.value = true
   try {
     await portfolioStore.resetPortfolio()
-    alert('Portfolio reset to $10,000')
+    toast.success('Portfolio reset to $10,000')
   } catch (err) {
-    alert('Failed to reset portfolio')
+    toast.error('Failed to reset portfolio')
   } finally {
     resetting.value = false
   }
@@ -333,20 +335,22 @@ async function handleReset() {
 function handleExportTrades() {
   const trades = portfolioStore.trades
   if (trades.length === 0) {
-    alert('No trades to export yet')
+    toast.warning('No trades to export yet')
     return
   }
   exportTradesToCSV(trades, `trades_${new Date().toISOString().split('T')[0]}.csv`)
+  toast.success('Trades exported successfully')
 }
 
 function handleExportPortfolio() {
   const portfolio = portfolioStore.portfolio
   const trades = portfolioStore.trades
   if (!portfolio) {
-    alert('No portfolio data available')
+    toast.warning('No portfolio data available')
     return
   }
   exportPortfolioToCSV(portfolio, trades, `portfolio_${new Date().toISOString().split('T')[0]}.csv`)
+  toast.success('Portfolio exported successfully')
 }
 
 function testSound() {
