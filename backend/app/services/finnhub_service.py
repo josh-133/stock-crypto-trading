@@ -184,7 +184,7 @@ class FinnhubService:
             "change": change,
             "change_percent": change_percent,
             "volume": volume,
-            "timestamp": datetime.fromtimestamp(timestamp / 1000) if timestamp else datetime.now(),
+            "timestamp": (datetime.fromtimestamp(timestamp / 1000) if timestamp else datetime.now()).isoformat(),
             "source": "finnhub"
         }
 

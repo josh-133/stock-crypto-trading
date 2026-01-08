@@ -1,10 +1,12 @@
 """
 API routes for managing the stock watchlist.
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Path
 from pydantic import BaseModel
 
 from ...services.watchlist_service import watchlist_service
+
+MAX_SYMBOL_LENGTH = 10
 
 router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
 
@@ -40,7 +42,9 @@ async def get_watchlist():
 
 
 @router.post("/{symbol}", response_model=SymbolActionResponse)
-async def add_to_watchlist(symbol: str):
+async def add_to_watchlist(
+    symbol: str = Path(..., min_length=1, max_length=MAX_SYMBOL_LENGTH)
+):
     """Add a symbol to the watchlist."""
     result = watchlist_service.add_symbol(symbol)
 
@@ -55,7 +59,9 @@ async def add_to_watchlist(symbol: str):
 
 
 @router.delete("/{symbol}", response_model=SymbolActionResponse)
-async def remove_from_watchlist(symbol: str):
+async def remove_from_watchlist(
+    symbol: str = Path(..., min_length=1, max_length=MAX_SYMBOL_LENGTH)
+):
     """Remove a symbol from the watchlist."""
     result = watchlist_service.remove_symbol(symbol)
 
@@ -79,7 +85,9 @@ async def search_symbols(
 
 
 @router.get("/validate/{symbol}")
-async def validate_symbol(symbol: str):
+async def validate_symbol(
+    symbol: str = Path(..., min_length=1, max_length=MAX_SYMBOL_LENGTH)
+):
     """Check if a symbol is valid."""
     is_valid = watchlist_service.validate_symbol(symbol)
     return {

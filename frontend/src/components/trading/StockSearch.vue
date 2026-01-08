@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { useWatchlistStore } from '../../stores/watchlist'
 import { useToast } from '../../composables/useToast'
 
@@ -79,6 +79,7 @@ const validating = ref(false)
 const validationError = ref('')
 
 let searchTimeout = null
+let documentClickHandler = null
 
 function handleInput() {
   validationError.value = ''
@@ -138,13 +139,29 @@ async function handleAddSymbol() {
 // Close dropdown when clicking outside
 watch(showResults, (show) => {
   if (show) {
-    const closeOnClick = (e) => {
+    // Remove any existing handler first
+    if (documentClickHandler) {
+      document.removeEventListener('click', documentClickHandler)
+    }
+
+    documentClickHandler = (e) => {
       if (!e.target.closest('.relative')) {
         showResults.value = false
-        document.removeEventListener('click', closeOnClick)
+        document.removeEventListener('click', documentClickHandler)
+        documentClickHandler = null
       }
     }
-    setTimeout(() => document.addEventListener('click', closeOnClick), 0)
+    setTimeout(() => document.addEventListener('click', documentClickHandler), 0)
+  }
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  if (documentClickHandler) {
+    document.removeEventListener('click', documentClickHandler)
   }
 })
 </script>
