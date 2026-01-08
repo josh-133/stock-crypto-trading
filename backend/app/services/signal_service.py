@@ -12,10 +12,11 @@ import pandas as pd
 from datetime import datetime
 from typing import Optional
 
-from ..config import STRATEGY_CONFIG, STOCK_UNIVERSE
+from ..config import STRATEGY_CONFIG
 from ..models.signal import Signal, SignalType, SignalSummary
 from .data_service import data_service
 from .indicator_service import add_indicators
+from .watchlist_service import watchlist_service
 
 logger = logging.getLogger(__name__)
 
@@ -155,10 +156,10 @@ def get_signal_for_stock(symbol: str) -> Signal:
 
 
 def get_all_signals() -> SignalSummary:
-    """Get signals for all stocks in the universe."""
+    """Get signals for all stocks in the user's watchlist."""
     signals = []
 
-    for symbol in STOCK_UNIVERSE:
+    for symbol in watchlist_service.get_watchlist():
         try:
             signal = get_signal_for_stock(symbol)
             signals.append(signal)

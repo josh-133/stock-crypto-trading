@@ -5,8 +5,8 @@ import logging
 from fastapi import APIRouter, HTTPException
 
 from ...services.portfolio_service import portfolio_service
+from ...services.watchlist_service import watchlist_service
 from ...models.trade import Trade, TradeRequest, TradeHistory
-from ...config import STOCK_UNIVERSE
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +36,11 @@ async def execute_trade(request: TradeRequest):
     try:
         symbol = request.symbol.upper()
 
-        # Input validation: Check symbol is in allowed list
-        if symbol not in STOCK_UNIVERSE:
+        # Validate symbol exists (via watchlist service which uses yfinance)
+        if not watchlist_service.validate_symbol(symbol):
             raise HTTPException(
                 status_code=400,
-                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
+                detail=f"{symbol} is not a valid stock symbol"
             )
 
         if request.action.value == "buy":

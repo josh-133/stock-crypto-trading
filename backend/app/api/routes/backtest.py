@@ -8,7 +8,7 @@ from typing import Optional
 from datetime import datetime
 
 from ...services.backtest_service import run_backtest, BacktestResult
-from ...config import STOCK_UNIVERSE
+from ...services.watchlist_service import watchlist_service
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +59,11 @@ async def backtest(request: BacktestRequest):
     try:
         symbol = request.symbol.upper()
 
-        # Input validation: Check symbol is in allowed list
-        if symbol not in STOCK_UNIVERSE:
+        # Validate symbol exists (via watchlist service which uses yfinance)
+        if not watchlist_service.validate_symbol(symbol):
             raise HTTPException(
                 status_code=400,
-                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
+                detail=f"{symbol} is not a valid stock symbol"
             )
 
         # Input validation: Check date format and logic

@@ -20,8 +20,9 @@ PAPER_TRADING_CONFIG = {
     "currency": "USD",
 }
 
-# Stock Universe - Large-cap, liquid US stocks
-STOCK_UNIVERSE = ["AAPL", "MSFT", "GOOGL", "SPY"]
+# Default Stock Watchlist - Initial symbols for new users
+# Actual watchlist is managed by watchlist_service with persistence
+DEFAULT_WATCHLIST = ["AAPL", "MSFT", "GOOGL", "SPY"]
 
 # Data Settings
 DATA_CONFIG = {

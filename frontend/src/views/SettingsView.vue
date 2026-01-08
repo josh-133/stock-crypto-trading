@@ -204,20 +204,44 @@
       </div>
     </div>
 
-    <!-- Stock Universe -->
+    <!-- Stock Watchlist -->
     <div class="card">
-      <h2 class="text-lg font-semibold text-theme-primary mb-4">Stock Universe</h2>
+      <h2 class="text-lg font-semibold text-theme-primary mb-4">
+        Stock Watchlist
+        <span class="text-sm font-normal text-theme-secondary ml-2">
+          ({{ watchlistStore.count }}/{{ watchlistStore.maxSize }})
+        </span>
+      </h2>
       <p class="text-sm text-theme-secondary mb-4">
-        Only large-cap, highly liquid US stocks are included to minimize gap risk.
+        Add any US stock to your watchlist. Signals will be scanned for these symbols.
       </p>
 
-      <div class="flex flex-wrap gap-2">
+      <!-- Add Stock Search -->
+      <div class="mb-4">
+        <StockSearch :disabled="watchlistStore.isFull" @added="onSymbolAdded" />
+        <p v-if="watchlistStore.isFull" class="text-sm text-yellow-500 mt-2">
+          Watchlist is full. Remove a symbol to add more.
+        </p>
+      </div>
+
+      <!-- Watchlist Symbols -->
+      <div v-if="watchlistStore.loading && watchlistStore.count === 0" class="text-theme-secondary">
+        Loading watchlist...
+      </div>
+      <div v-else class="flex flex-wrap gap-2">
         <span
-          v-for="symbol in symbols"
+          v-for="symbol in watchlistStore.symbols"
           :key="symbol"
-          class="px-3 py-1 rounded-full text-theme-primary bg-theme-tertiary"
+          class="group px-3 py-1 rounded-full text-theme-primary bg-theme-tertiary flex items-center gap-2"
         >
           {{ symbol }}
+          <button
+            @click="handleRemoveSymbol(symbol)"
+            class="opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity"
+            title="Remove from watchlist"
+          >
+            x
+          </button>
         </span>
       </div>
     </div>
@@ -298,22 +322,25 @@
 import { ref, onMounted } from 'vue'
 import { usePortfolioStore } from '../stores/portfolio'
 import { useSettingsStore } from '../stores/settings'
+import { useWatchlistStore } from '../stores/watchlist'
 import { useExport } from '../composables/useExport'
 import { useToast } from '../composables/useToast'
 import { tradingTerms } from '../composables/useTooltips'
 import Tooltip from '../components/ui/Tooltip.vue'
+import StockSearch from '../components/trading/StockSearch.vue'
 
 const portfolioStore = usePortfolioStore()
 const settingsStore = useSettingsStore()
+const watchlistStore = useWatchlistStore()
 const { exportTradesToCSV, exportPortfolioToCSV } = useExport()
 const toast = useToast()
 
-const symbols = ['AAPL', 'MSFT', 'GOOGL', 'SPY']
 const resetting = ref(false)
 
 onMounted(async () => {
   await portfolioStore.fetchPortfolio()
   await portfolioStore.fetchTrades()
+  await watchlistStore.fetchWatchlist()
 })
 
 async function handleReset() {
@@ -355,5 +382,19 @@ function handleExportPortfolio() {
 
 function testSound() {
   settingsStore.playSound('buy')
+}
+
+async function handleRemoveSymbol(symbol) {
+  const result = await watchlistStore.removeSymbol(symbol)
+  if (result.success) {
+    toast.success(result.message)
+  } else {
+    toast.error(result.message)
+  }
+}
+
+function onSymbolAdded(symbol) {
+  // Symbol was added successfully, nothing extra to do
+  // The watchlist store is already updated
 }
 </script>

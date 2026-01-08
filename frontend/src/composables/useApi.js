@@ -82,6 +82,32 @@ export function useApi() {
     return response.data
   }
 
+  // Watchlist
+  const getWatchlist = async () => {
+    const response = await api.get('/watchlist')
+    return response.data
+  }
+
+  const addToWatchlist = async (symbol) => {
+    const response = await api.post(`/watchlist/${symbol}`)
+    return response.data
+  }
+
+  const removeFromWatchlist = async (symbol) => {
+    const response = await api.delete(`/watchlist/${symbol}`)
+    return response.data
+  }
+
+  const searchSymbols = async (query) => {
+    const response = await api.get('/watchlist/search', { params: { q: query } })
+    return response.data
+  }
+
+  const validateSymbol = async (symbol) => {
+    const response = await api.get(`/watchlist/validate/${symbol}`)
+    return response.data
+  }
+
   return {
     getStockData,
     getLatestPrice,
@@ -96,5 +122,10 @@ export function useApi() {
     getTrades,
     runBacktest,
     getBenchmark,
+    getWatchlist,
+    addToWatchlist,
+    removeFromWatchlist,
+    searchSymbols,
+    validateSymbol,
   }
 }

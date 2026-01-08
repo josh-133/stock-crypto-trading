@@ -8,7 +8,7 @@ from datetime import datetime
 from ...services.data_service import data_service
 from ...services.indicator_service import add_indicators, get_indicator_values
 from ...models.stock import StockData, StockPrice, StockLatest
-from ...config import DATA_CONFIG, STOCK_UNIVERSE
+from ...config import DATA_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +29,6 @@ async def get_stock_data(symbol: str, days: int = DATA_CONFIG["lookback_days"]):
     """
     try:
         symbol = symbol.upper()
-
-        # Input validation: Check symbol is in allowed list
-        if symbol not in STOCK_UNIVERSE:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
-            )
 
         # Input validation: Bounds check on days
         if days < 1 or days > 1825:  # Max ~5 years
@@ -96,13 +89,6 @@ async def get_latest_price(symbol: str):
     """
     try:
         symbol = symbol.upper()
-
-        # Input validation: Check symbol is in allowed list
-        if symbol not in STOCK_UNIVERSE:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Symbol must be one of: {', '.join(STOCK_UNIVERSE)}"
-            )
 
         latest = data_service.get_latest_price(symbol)
 

@@ -7,7 +7,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import Optional
 
-from ..config import DATA_CONFIG, STOCK_UNIVERSE
+from ..config import DATA_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +76,10 @@ class DataService:
             "timestamp": df.index[-1].to_pydatetime(),
         }
 
-    def get_all_stocks_data(self) -> dict[str, pd.DataFrame]:
-        """Fetch data for all stocks in the universe."""
+    def get_all_stocks_data(self, symbols: list[str]) -> dict[str, pd.DataFrame]:
+        """Fetch data for all stocks in the provided list."""
         data = {}
-        for symbol in STOCK_UNIVERSE:
+        for symbol in symbols:
             try:
                 data[symbol] = self.get_stock_data(symbol)
             except Exception as e:
